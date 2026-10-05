@@ -1,13 +1,13 @@
 <div align="center">
 
-  <img src="https://raw.githubusercontent.com/DrakesCraft-Labs/Supreme-Drake/main/banner.svg" alt="Supreme-Drake Banner" width="920" />
+  <img src="https://raw.githubusercontent.com/SlimefunNewHorizons/Supreme-Drake/main/banner.svg" alt="Supreme-Drake Banner" width="920" />
 
 # 👑 Supreme-Drake
 
 **Addon Endgame de Slimefun4 con Tarjetas de Mejora, Generadores Cuánticos, BeeTech, MobTech y Aceleración Nativa en Rust**
 
 <p>
-  <a href="https://github.com/DrakesCraft-Labs/Supreme-Drake"><img src="https://img.shields.io/badge/GitHub-Supreme--Drake-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
+  <a href="https://github.com/SlimefunNewHorizons/Supreme-Drake"><img src="https://img.shields.io/badge/GitHub-Supreme--Drake-181717?style=for-the-badge&logo=github" alt="GitHub"/></a>
   <img src="https://img.shields.io/badge/Java-21_FFM_Panama-F89820?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21 FFM"/>
   <img src="https://img.shields.io/badge/Rust-FFM_Accelerated-FF4500?style=for-the-badge&logo=rust&logoColor=white" alt="Rust Native"/>
   <img src="https://img.shields.io/badge/Paper-1.21.11-FFD700?style=for-the-badge&logo=minecraft&logoColor=white" alt="Paper 1.21.11"/>
@@ -92,7 +92,7 @@ de Slimefun: no hace falta ningún comando especial para empezar.
 |---|---|
 | Servidor | Paper / Purpur **1.21.11** |
 | Java | **21** |
-| Requiere | [Slimefun4-Drake](https://github.com/DrakesCraft-Labs/Slimefun4-Drake) |
+| Requiere | [Slimefun4-Drake](https://github.com/SlimefunNewHorizons/Slimefun4-Drake) |
 | Lado | Solo servidor — quien juega no instala nada |
 | Versión | ${project.version} |
 
@@ -110,7 +110,7 @@ de Slimefun: no hace falta ningún comando especial para empezar.
 - Especttra
 - WilianSantosBR e Mynothauro
 
-Port y mantenimiento por **DrakesCraft Labs**. La autoría original es de quien figura arriba; el detalle está en [docs/UPSTREAM_ATTRIBUTION.md](https://raw.githubusercontent.com/DrakesCraft-Labs/Supreme-Drake/main/docs/UPSTREAM_ATTRIBUTION.md).
+Port y mantenimiento por **DrakesCraft Labs**. La autoría original es de quien figura arriba; el detalle está en [docs/UPSTREAM_ATTRIBUTION.md](https://raw.githubusercontent.com/SlimefunNewHorizons/Supreme-Drake/main/docs/UPSTREAM_ATTRIBUTION.md).
 
 Licencia **GPL-3.0-only**.
 
@@ -119,7 +119,7 @@ Licencia **GPL-3.0-only**.
 - **Original Project / Upstream**: Slimefun4 Community Addon.
 - **Port & Maintenance**: DrakesCraft Labs team (Compatibility for Paper / Purpur 1.21.11).
 - **License**: GPL-3.0 / MIT.
-- **Source Code**: [GitHub Repository](https://github.com/DrakesCraft-Labs/Supreme-Drake)
-- **Support & Issues**: [GitHub Issues](https://github.com/DrakesCraft-Labs/Supreme-Drake/issues) | [Discord](https://discord.gg/rv3vtXZTk7)
+- **Source Code**: [GitHub Repository](https://github.com/SlimefunNewHorizons/Supreme-Drake)
+- **Support & Issues**: [GitHub Issues](https://github.com/SlimefunNewHorizons/Supreme-Drake/issues) | [Discord](https://discord.gg/rv3vtXZTk7)
 
 *This project is an open-source derivative work maintained by DrakesCraft Labs under the terms of its original license. All original assets and concepts belong to their respective creators.*

@@ -16,13 +16,13 @@ jobs:
       - name: Checkout Drake foundry
         uses: actions/checkout@v4
         with:
-          repository: DrakesCraft-Labs/drakes-slimefun-labs
+          repository: SlimefunNewHorizons/drakes-slimefun-labs
           path: drakes-slimefun-labs
           ref: main
       - name: Checkout Slimefun Drake
         uses: actions/checkout@v4
         with:
-          repository: DrakesCraft-Labs/Slimefun4-Drake
+          repository: SlimefunNewHorizons/Slimefun4-Drake
           path: slimefun-core
           ref: main
       - name: Set up JDK 21
