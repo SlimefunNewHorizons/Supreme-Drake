@@ -3,7 +3,7 @@ package com.github.relativobr.supreme.util;
 import static com.github.relativobr.supreme.util.CompatibilySupremeLegacy.getOldIdSupremeLegacy;
 
 import com.github.relativobr.supreme.Supreme;
-import com.github.drakescraft_labs.slimefun4.api.items.SlimefunItemStack;
+import io.github.thebusybiscuit.slimefun4.api.items.SlimefunItemStack;
 import org.apache.commons.lang.ArrayUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

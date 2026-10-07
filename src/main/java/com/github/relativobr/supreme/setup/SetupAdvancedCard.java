@@ -4,7 +4,7 @@ import com.github.relativobr.supreme.Supreme;
 import com.github.relativobr.supreme.machine.tech.TechGenerator;
 import com.github.relativobr.supreme.resource.SupremeComponents;
 import com.github.relativobr.supreme.resource.mobtech.AdvancedCard;
-import com.github.drakescraft_labs.slimefun4.implementation.SlimefunItems;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
