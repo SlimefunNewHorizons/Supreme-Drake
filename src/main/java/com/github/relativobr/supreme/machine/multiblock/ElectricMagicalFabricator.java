@@ -16,6 +16,8 @@ import com.github.drakescraft_labs.slimefun4.core.attributes.MachineTier;
 import com.github.drakescraft_labs.slimefun4.core.attributes.MachineType;
 import com.github.drakescraft_labs.slimefun4.implementation.SlimefunItems;
 import com.github.drakescraft_labs.slimefun4.utils.LoreBuilder;
+import com.github.drakescraft_labs.slimefun4.utils.SlimefunUtils;
+import com.github.drakescraft_labs.slimefun4.legacy.api.inventory.DirtyChestMenu;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -60,6 +62,59 @@ public class ElectricMagicalFabricator extends GenericMachine {
   public ElectricMagicalFabricator(ItemGroup category, SlimefunItemStack item, RecipeType recipeType,
       ItemStack[] recipe) {
     super(category, item, recipeType, recipe);
+  }
+
+  /**
+   * Reporte de Mr_Em1lio (2026-10-13): al Electric Magical le llegaban todos los cores a la vez
+   * por transporte automatico y no se podia automatizar, igual que pasaba con el Core Fabricator.
+   *
+   * Cada receta de esta maquina usa un grupo propio de items (los 9 cores de Life, los de Death,
+   * los Cetrus...). El cargo metia cualquier core en cualquier hueco libre, mezclando grupos hasta
+   * llenar las 9 ranuras sin que ninguna receta pudiera completarse.
+   *
+   * Ahora un item solo entra si existe una receta que contenga a la vez ese item y todo lo que ya
+   * hay en la entrada; el resto se rechaza y espera en la red. Items de ninguna receta nunca
+   * entran. La colocacion dentro de la rejilla sigue siendo la de la clase base (primero los
+   * stacks empezados), porque la receta se busca por totales y no por posicion.
+   */
+  @Override
+  protected int[] getInsertSlotsForItem(DirtyChestMenu menu, ItemStack item) {
+    if (item == null) {
+      return new int[0];
+    }
+    List<ItemStack> present = new ArrayList<>();
+    for (int slot : getInputSlots()) {
+      ItemStack stack = menu.getItemInSlot(slot);
+      if (stack != null && stack.getType() != Material.AIR) {
+        present.add(stack);
+      }
+    }
+    for (AbstractItemRecipe recipe : machineRecipes) {
+      ItemStack[] ingredients = recipe.getInputNotNull();
+      if (!isIngredient(ingredients, item)) {
+        continue;
+      }
+      boolean compatible = true;
+      for (ItemStack stack : present) {
+        if (!isIngredient(ingredients, stack)) {
+          compatible = false;
+          break;
+        }
+      }
+      if (compatible) {
+        return super.getInsertSlotsForItem(menu, item);
+      }
+    }
+    return new int[0];
+  }
+
+  private static boolean isIngredient(ItemStack[] ingredients, ItemStack stack) {
+    for (ItemStack ingredient : ingredients) {
+      if (ingredient != null && SlimefunUtils.isItemSimilar(stack, ingredient, false, false)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public static List<AbstractItemRecipe> getAllRecipe() {
