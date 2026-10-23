@@ -34,6 +34,8 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.springframework.scheduling.annotation.Async;
 
 import javax.annotation.Nonnull;
@@ -45,6 +47,9 @@ import java.util.Objects;
 
 @Async
 public class TechRobotic extends SimpleItemContainerMachine implements Radioactive {
+
+  private static final String PROCESSING_ITEM_KEY = "supreme-tech-robotic-processing-item";
+  private static final String PROCESSING_TIME_KEY = "supreme-tech-robotic-processing-time";
 
   public static final SlimefunItemStack TECH_ROBOTIC = new SupremeItemStack("SUPREME_TECH_ROBOTIC",
       Material.POLISHED_BLACKSTONE, "&bTech Robotic", "", "&fUse beginner level robots ",
@@ -172,7 +177,7 @@ public class TechRobotic extends SimpleItemContainerMachine implements Radioacti
 
     BlockMenu inv = BlockStorage.getInventory(b);
 
-    final ItemStack itemProcess = processing.get(b);
+    final ItemStack itemProcess = getProcessingItem(b);
     if (itemProcess == null) {
 
       final ItemStack itemOutput = validRecipeItem(inv);
@@ -180,8 +185,8 @@ public class TechRobotic extends SimpleItemContainerMachine implements Radioacti
 
         invalidProgressBar(inv, itemOutput.getType(), " ");
 
-        processing.put(b, itemOutput);
-        progressTime.put(b, (getTimeProcess() * 2));
+        setProcessingItem(b, itemOutput);
+        setProgressTime(b, getTimeProcess() * 2);
 
       } else {
 
@@ -199,8 +204,7 @@ public class TechRobotic extends SimpleItemContainerMachine implements Radioacti
 
         inv.pushItem(itemProcess.clone(), this.getOutputSlots());
 
-        processing.put(b, null);
-        progressTime.put(b, 0);
+        clearProcessing(b);
         invalidProgressBar(inv, Material.BLACK_STAINED_GLASS_PANE, " ");
 
       } else {
@@ -214,7 +218,23 @@ public class TechRobotic extends SimpleItemContainerMachine implements Radioacti
   }
 
   public int getProgressTime(Block b) {
-    return progressTime.get(b) != null ? progressTime.get(b) : (getTimeProcess() * 2);
+    Integer stored = progressTime.get(b);
+    if (stored != null) {
+      return stored;
+    }
+
+    String persisted = BlockStorage.getLocationInfo(b.getLocation(), PROCESSING_TIME_KEY);
+    if (persisted != null) {
+      try {
+        stored = Math.max(0, Integer.parseInt(persisted));
+        progressTime.put(b, stored);
+        return stored;
+      } catch (NumberFormatException ignored) {
+        // A corrupt progress value only restarts this operation's timer; the output remains stored.
+      }
+    }
+
+    return getTimeProcess() * 2;
   }
 
   @Override
@@ -235,6 +255,9 @@ public class TechRobotic extends SimpleItemContainerMachine implements Radioacti
           time = 0;
         }
         progressTime.put(b, time);
+        if (time == 0 || time % 20 == 0) {
+          BlockStorage.addBlockInfo(b, PROCESSING_TIME_KEY, Integer.toString(time));
+        }
 
         //todo adjust for partial progression in the 3 slots dynamically
         for (int i : InventoryRecipe.TECH_ROBOTIC_PROGRESS_BAR_SLOT) {
@@ -247,6 +270,51 @@ public class TechRobotic extends SimpleItemContainerMachine implements Radioacti
     } else {
       invalidProgressBar(inv, "&cMachine time failure");
     }
+  }
+
+  private ItemStack getProcessingItem(Block block) {
+    ItemStack cached = processing.get(block);
+    if (cached != null) {
+      return cached;
+    }
+
+    String serialized = BlockStorage.getLocationInfo(block.getLocation(), PROCESSING_ITEM_KEY);
+    if (serialized == null) {
+      return null;
+    }
+
+    try {
+      YamlConfiguration config = new YamlConfiguration();
+      config.loadFromString(serialized);
+      ItemStack item = config.getItemStack("item");
+      if (item != null && !item.getType().isAir() && item.getAmount() > 0) {
+        processing.put(block, item);
+        return item;
+      }
+    } catch (InvalidConfigurationException ignored) {
+      // Keep the serialized value untouched: an administrator can recover it from BlockStorage.
+    }
+
+    return null;
+  }
+
+  private void setProcessingItem(Block block, ItemStack item) {
+    processing.put(block, item);
+    YamlConfiguration config = new YamlConfiguration();
+    config.set("item", item);
+    BlockStorage.addBlockInfo(block, PROCESSING_ITEM_KEY, config.saveToString());
+  }
+
+  private void setProgressTime(Block block, int time) {
+    progressTime.put(block, time);
+    BlockStorage.addBlockInfo(block, PROCESSING_TIME_KEY, Integer.toString(time));
+  }
+
+  private void clearProcessing(Block block) {
+    processing.remove(block);
+    progressTime.remove(block);
+    BlockStorage.addBlockInfo(block, PROCESSING_ITEM_KEY, null);
+    BlockStorage.addBlockInfo(block, PROCESSING_TIME_KEY, null);
   }
 
   private ItemStack validRecipeItem(BlockMenu inv) {
