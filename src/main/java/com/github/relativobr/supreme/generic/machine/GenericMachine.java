@@ -143,6 +143,7 @@ public class GenericMachine extends AContainer implements NotHopperable, RecipeD
       public void onBlockBreak(Block b) {
         BlockMenu inv = BlockStorage.getInventory(b);
         if (inv != null) {
+          recoverLegacyProcessingOutput(b, inv);
           revertConsumedItem(b, inv);
           inv.dropItems(b.getLocation(), getInputSlots());
           inv.dropItems(b.getLocation(), getOutputSlots());
@@ -161,6 +162,14 @@ public class GenericMachine extends AContainer implements NotHopperable, RecipeD
    */
   protected void onMachineRemoved(Block b) {
     // Por defecto no hace nada; la base ya limpia sus propios mapas en removeMapBlock.
+  }
+
+  /**
+   * Gives subclasses that kept a completed output outside the menu a last chance to return it
+   * before the inventory is dropped. Legacy machines use this for operations already paid for.
+   */
+  protected void recoverLegacyProcessingOutput(Block b, BlockMenu inv) {
+    // Most machines keep their processing state in the menu and need no extra recovery.
   }
 
   protected void updateStatusReset(BlockMenu menu) {
