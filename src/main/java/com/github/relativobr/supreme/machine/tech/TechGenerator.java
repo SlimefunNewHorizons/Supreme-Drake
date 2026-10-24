@@ -43,6 +43,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +53,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class TechGenerator extends SimpleItemContainerMachine implements Radioactive {
+
+  private static final String PROCESSING_ITEM_KEY = "supreme-tech-generator-processing-item";
+  private static final String PROCESSING_TIME_KEY = "supreme-tech-generator-processing-time";
 
   public static final SlimefunItemStack TECH_GENERATOR = new SupremeItemStack(
       "SUPREME_TECH_GENERATOR", Material.LOOM,
@@ -221,7 +226,7 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
       return;
     }
 
-    final ItemStack itemProduction = processing.get(b);
+    final ItemStack itemProduction = getProcessingItem(b);
     if (itemProduction == null) {
       final ItemStack validRecipeItem = validRecipeItem(inv);
 
@@ -229,8 +234,8 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
 
         invalidStatus(inv, validRecipeItem.getType(), " ");
 
-        processing.put(b, validRecipeItem);
-        progressTime.put(b, (getTimeProcess() * 2));
+        setProcessingItem(b, validRecipeItem);
+        setProgressTime(b, getTimeProcess() * 2);
 
       } else {
 
@@ -251,8 +256,7 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
           inv.pushItem(output.clone(), this.getOutputSlots());
         }
 
-        processing.put(b, null);
-        progressTime.put(b, 0);
+        clearProcessing(b);
         invalidStatus(inv, Material.BLACK_STAINED_GLASS_PANE, " ");
 
       } else {
@@ -264,8 +268,7 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
 
         } else {
 
-          processing.put(b, null);
-          progressTime.put(b, 0);
+          clearProcessing(b);
           invalidStatus(inv, Material.BLACK_STAINED_GLASS_PANE, " ");
         }
       }
@@ -322,7 +325,23 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
   }
 
   public int getProgressTime(Block b) {
-    return progressTime.get(b) != null ? progressTime.get(b) : (getTimeProcess() * 2);
+    Integer stored = progressTime.get(b);
+    if (stored != null) {
+      return stored;
+    }
+
+    String persisted = BlockStorage.getLocationInfo(b.getLocation(), PROCESSING_TIME_KEY);
+    if (persisted != null) {
+      try {
+        stored = Math.max(0, Integer.parseInt(persisted));
+        progressTime.put(b, stored);
+        return stored;
+      } catch (NumberFormatException ignored) {
+        // Keep the output state: only this operation's timer is invalid.
+      }
+    }
+
+    return getTimeProcess() * 2;
   }
 
   @Override
@@ -343,6 +362,9 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
           time = 0;
         }
         progressTime.put(b, time);
+        if (time == 0 || time % 20 == 0) {
+          BlockStorage.addBlockInfo(b, PROCESSING_TIME_KEY, Integer.toString(time));
+        }
 
         int ticksTotal = getTimeProcess() * 2;
 
@@ -440,6 +462,52 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
       }
     }
     return consumption;
+  }
+
+  @Nullable
+  private ItemStack getProcessingItem(Block block) {
+    ItemStack cached = processing.get(block);
+    if (cached != null) {
+      return cached;
+    }
+
+    String serialized = BlockStorage.getLocationInfo(block.getLocation(), PROCESSING_ITEM_KEY);
+    if (serialized == null) {
+      return null;
+    }
+
+    try {
+      YamlConfiguration config = new YamlConfiguration();
+      config.loadFromString(serialized);
+      ItemStack item = config.getItemStack("item");
+      if (item != null && !item.getType().isAir() && item.getAmount() > 0) {
+        processing.put(block, item);
+        return item;
+      }
+    } catch (InvalidConfigurationException ignored) {
+      // Preserve the serialized value for manual recovery instead of dropping output.
+    }
+
+    return null;
+  }
+
+  private void setProcessingItem(Block block, ItemStack item) {
+    processing.put(block, item);
+    YamlConfiguration config = new YamlConfiguration();
+    config.set("item", item);
+    BlockStorage.addBlockInfo(block, PROCESSING_ITEM_KEY, config.saveToString());
+  }
+
+  private void setProgressTime(Block block, int time) {
+    progressTime.put(block, time);
+    BlockStorage.addBlockInfo(block, PROCESSING_TIME_KEY, Integer.toString(time));
+  }
+
+  private void clearProcessing(Block block) {
+    processing.remove(block);
+    progressTime.remove(block);
+    BlockStorage.addBlockInfo(block, PROCESSING_ITEM_KEY, null);
+    BlockStorage.addBlockInfo(block, PROCESSING_TIME_KEY, null);
   }
 
   @Nullable
