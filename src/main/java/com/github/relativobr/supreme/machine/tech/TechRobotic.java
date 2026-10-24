@@ -243,6 +243,14 @@ public class TechRobotic extends SimpleItemContainerMachine implements Radioacti
     progressTime.remove(b);
   }
 
+  @Override
+  protected void recoverLegacyProcessingOutput(Block b, BlockMenu inv) {
+    ItemStack pendingOutput = getProcessingItem(b);
+    if (pendingOutput != null) {
+      b.getWorld().dropItemNaturally(b.getLocation(), pendingOutput.clone());
+    }
+  }
+
   private void processTicks(Block b, BlockMenu inv, ItemStack result) {
     int ticksTotal = getTimeProcess() * 2;
     int ticksLeft = this.getProgressTime(b);

@@ -350,6 +350,18 @@ public class TechGenerator extends SimpleItemContainerMachine implements Radioac
     progressTime.remove(b);
   }
 
+  @Override
+  protected void recoverLegacyProcessingOutput(Block b, BlockMenu inv) {
+    ItemStack pendingOutput = getProcessingItem(b);
+    if (pendingOutput == null) {
+      return;
+    }
+
+    for (ItemStack output : collectPendingOutputs(inv, pendingOutput)) {
+      b.getWorld().dropItemNaturally(b.getLocation(), output.clone());
+    }
+  }
+
   private void processTicks(Block b, BlockMenu inv, ItemStack result) {
     int ticksLeft = this.getProgressTime(b);
     if (ticksLeft > 0) {
